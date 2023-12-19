@@ -173,4 +173,9 @@ public class UserService implements UserRepository {
     public Page<User> findAll(Pageable pageable) {
         return null;
     }
+
+    @Override
+    public User findUserByUserName(String username) {
+        return this.userRepository.findUserByUserName(username);
+    }
 }
