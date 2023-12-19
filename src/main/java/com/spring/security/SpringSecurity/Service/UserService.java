@@ -121,7 +121,7 @@ public class UserService implements UserRepository {
 
     @Override
     public boolean existsById(Integer integer) {
-        return this.existsById(integer);
+        return this.userRepository.existsById(integer);
     }
 
     @Override
