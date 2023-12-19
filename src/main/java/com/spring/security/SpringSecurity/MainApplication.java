@@ -29,12 +29,14 @@ public class MainApplication implements CommandLineRunner {
 		UserService defaultUser = appContext.getBean(UserService.class);
 
 		User user = User.builder()
+				.id(1)
 				.username("admin")
 				.password("admin")
 				.rol(Rol.ADMIN)
 				.build();
 
-		System.out.println(defaultUser.save(user));
+		if(defaultUser.existsById(1) == false)
+			System.out.println(defaultUser.save(user));
 
 	}
 }
