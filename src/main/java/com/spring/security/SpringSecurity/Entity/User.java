@@ -1,6 +1,7 @@
 package com.spring.security.SpringSecurity.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.Objects;
@@ -14,10 +15,12 @@ import java.util.Objects;
 @Table(name = "User" )
 public class User {
 
-    @Id
+    @Id()
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "username")
+    @NotNull
     private String username;
 
     @Column(name = "password")
@@ -25,6 +28,12 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Rol rol;
+
+    public User(String username, String password, Rol rol) {
+        this.username = username;
+        this.password = password;
+        this.rol = rol;
+    }
 
     @Override
     public String toString() {
