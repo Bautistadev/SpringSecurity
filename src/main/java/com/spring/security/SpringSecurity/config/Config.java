@@ -1,10 +1,13 @@
 package com.spring.security.SpringSecurity.config;
 
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import javax.management.MXBean;
 /*
@@ -33,10 +36,30 @@ public class Config {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth ->
                 auth.requestMatchers("/swagger-ui/**").permitAll()
-                        .anyRequest().authenticated()
+                .anyRequest().authenticated()
         ).formLogin()
-                .permitAll(); /** All endpoints before the success login, the authentication is required */
+                .successHandler(authenticationSuccessHandler("/index.html")) /** If the username and password are correct, redirect to main menu*/
+                .permitAll()/** All endpoints before the success login, the authentication is required */
+                .and()
+                .logout()
+                    .logoutUrl("/logout")
+                    .logoutSuccessHandler(logoutSuccessHandler("/login")); /**Return to login page, when the user logout*/
 
         return http.build();
     }
+
+
+    private AuthenticationSuccessHandler authenticationSuccessHandler(String url){
+        return ((request, response, authentication) -> {
+            response.sendRedirect(url);
+        });
+    }
+    private LogoutSuccessHandler logoutSuccessHandler(String url){
+        return ((request, response, authentication) -> {
+            response.sendRedirect(url);
+        });
+    }
+
 }
+
+
