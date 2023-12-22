@@ -4,6 +4,7 @@ import com.spring.security.SpringSecurity.Entity.Rol;
 import com.spring.security.SpringSecurity.Entity.User;
 import com.spring.security.SpringSecurity.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -21,8 +22,16 @@ public class MainApplication implements CommandLineRunner {
 		ConfigurableApplicationContext ap = SpringApplication.run(MainApplication.class, args);
 	}
 
+
 	@Autowired
 	private ApplicationContext appContext;
+
+	/** Properties data, for the default user*/
+	@Value("${api.default.username}")
+	private String username;
+	@Value("${api.default.password}")
+	private String password;
+
 	@Override
 	public void run(String... args) throws Exception {
 
@@ -30,8 +39,8 @@ public class MainApplication implements CommandLineRunner {
 
 		User user = User.builder()
 				.id(1)
-				.username("admin")
-				.password("admin")
+				.username(username)
+				.password(username)
 				.rol(Rol.ADMIN)
 				.build();
 
