@@ -8,7 +8,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
+/**
+ * IMPLEMENTS DE USER AUTHENTICATION DETAILS, NECESSARY FOR THE IMPLEMENTATION OF
+ * SPRING SECURITY, CONCRETELY IN THE LOGIN SESSION.
+ *
+ * */
 public class UserDetailsServiceImplements implements UserDetailsService {
 
 

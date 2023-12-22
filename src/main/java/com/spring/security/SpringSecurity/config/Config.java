@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -38,12 +39,22 @@ public class Config {
                 auth.requestMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().authenticated()
         ).formLogin()
-                .successHandler(authenticationSuccessHandler("/index.html")) /** If the username and password are correct, redirect to main menu*/
+                .successHandler(authenticationSuccessHandler("/index.html")) /** If the username and password are correct after init session, redirect to main menu*/
                 .permitAll()/** All endpoints before the success login, the authentication is required */
                 .and()
                 .logout()
                     .logoutUrl("/logout")
-                    .logoutSuccessHandler(logoutSuccessHandler("/login")); /**Return to login page, when the user logout*/
+                    .logoutSuccessHandler(logoutSuccessHandler("/login")) /**Return to login page, when the user logout*/
+                .and()
+                .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)/**Create a new session, when there is not exist some other session*/
+                    .invalidSessionUrl("/login") /**If the username and password are not correct, redirect the user to login */
+                    .maximumSessions(1)/**Maximum number of session */
+                    .expiredUrl("/login") /** When the session expired, redirect to login page*/
+                .and()
+                .sessionFixation()/**This is another, vulnerability of web application when it's working with session  */
+                    .migrateSession()/***/
+                ;
 
         return http.build();
     }
