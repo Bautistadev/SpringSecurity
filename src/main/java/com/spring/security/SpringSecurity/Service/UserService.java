@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -103,7 +104,7 @@ public class UserService implements UserRepository {
     public <S extends User, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return null;
     }
-
+    @Transactional
     @Override
     public <S extends User> S save(S entity) {
         return this.userRepository.save(entity);
@@ -177,5 +178,10 @@ public class UserService implements UserRepository {
     @Override
     public User findUserByUserName(String username) {
         return this.userRepository.findUserByUserName(username);
+    }
+
+    @Transactional
+    public User UpdateUser(User user){
+        return this.userRepository.save(user);
     }
 }
