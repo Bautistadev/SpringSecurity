@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -36,7 +38,8 @@ public class Config {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth ->
-                auth.requestMatchers("/swagger-ui/**").permitAll()
+                auth.requestMatchers("/swagger-ui/**",
+                                                "/v3/api-docs").permitAll()
                 .anyRequest().authenticated()
         ).formLogin()
                 .successHandler(authenticationSuccessHandler("/index.html")) /** If the username and password are correct after init session, redirect to main menu*/
@@ -51,12 +54,18 @@ public class Config {
                     .invalidSessionUrl("/login") /**If the username and password are not correct, redirect the user to login */
                     .maximumSessions(1)/**Maximum number of session */
                     .expiredUrl("/login") /** When the session expired, redirect to login page*/
+                    .sessionRegistry(sessionRegistry())
                 .and()
                 .sessionFixation()/**This is another, vulnerability of web application when it's working with session  */
                     .migrateSession()/***/
                 ;
 
         return http.build();
+    }
+
+    @Bean
+    public SessionRegistry sessionRegistry(){
+        return new SessionRegistryImpl();
     }
 
 
