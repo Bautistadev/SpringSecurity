@@ -43,12 +43,14 @@ class UserServiceTest {
                 .rol(Rol.USER)
                 .build();
 
-        when(userService.save(user)).thenReturn(user);
+
+
+        when(this.userService.save(user)).thenReturn(user);
         assertInstanceOf(User.class,userService.save(user));
-        assertNotNull(this.userService.save(user));
-        assertEquals(this.userService.save(user).getUsername(),"bautista");
-        assertEquals(this.userService.save(user).getPassword(),"master");
-        assertNotEquals(this.userService.save(user).getRol(),Rol.ADMIN);
+        assertNotNull(userService.save(user));
+        assertEquals(userService.save(user).getUsername(),"bautista");
+        assertEquals(userService.save(user).getPassword(),"master");
+        assertNotEquals(userService.save(user).getRol(),Rol.ADMIN);
     }
 
     @Test
@@ -64,6 +66,19 @@ class UserServiceTest {
          *  userService RETURN IS A CONCRETE INSTANCE OF LIST CLASS
          * */
         assertTrue(userList instanceof List<User>);
+
+    }
+
+    @Test
+    public void findUserByUserName(){
+        User user = User.builder()
+                .username("bautista")
+                .password("master")
+                .rol(Rol.USER)
+                .build();
+        this.userService.save(user);
+        when(this.userService.findUserByUserName(user.getUsername())).thenReturn(user);
+        assertTrue(this.userService.findUserByUserName(user.getUsername()) instanceof  User);
 
     }
 }

@@ -1,5 +1,6 @@
 package com.spring.security.SpringSecurity.config;
 
+import com.spring.security.SpringSecurity.Controller.Controller;
 import com.spring.security.SpringSecurity.Repository.UserRepository;
 import com.spring.security.SpringSecurity.Service.UserService;
 import org.springframework.context.annotation.Bean;
@@ -12,5 +13,10 @@ public class BeanConfiguration {
     @Bean
     public UserService userService(UserRepository userRepository){
         return new UserService(userRepository);
+    }
+
+    @Bean
+    public Controller controller(){
+        return  new Controller();
     }
 }
