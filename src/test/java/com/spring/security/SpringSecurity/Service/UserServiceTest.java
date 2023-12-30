@@ -63,7 +63,7 @@ class UserServiceTest {
         assertTrue(userList instanceof List<?>);
 
         /** RETURN TRUE ANS SUCCESS TEST, IF THE USER LIST THAT
-         *  userService RETURN IS A CONCRETE INSTANCE OF LIST CLASS
+         *  userService RETURN IS A CONCRETE INSTANCE OF USER LIST CLASS
          * */
         assertTrue(userList instanceof List<User>);
 
