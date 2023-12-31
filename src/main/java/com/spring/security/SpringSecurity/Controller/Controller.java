@@ -20,11 +20,6 @@ public class Controller {
     @Autowired
     private SessionRegistry sessionRegistry;
 
-    @GetMapping("/hola")
-    public String index(){
-        return "hola mundo";
-    }
-
     @GetMapping("/DetailsSession")
     public ResponseEntity<?> getUsersDetails(){
 

@@ -1,13 +1,20 @@
 package com.spring.security.SpringSecurity.config;
 
 
+import com.spring.security.SpringSecurity.Controller.loginController;
+import com.spring.security.SpringSecurity.Service.UserDetailsServiceImplements;
+import com.spring.security.SpringSecurity.Service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,43 +41,57 @@ public class Config {
     }*/
 
     /**
+     * ENDPOINT CONFIGURATION
      * All endponits that have relation with /swagger-ui, the authentication it is not required
      * but, other url, the authentication is required for all users
      * */
+
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth ->
-                auth.requestMatchers("/swagger-ui/**",
-                                                "/v3/api-docs").permitAll()
-                .anyRequest().authenticated()
-        ).formLogin()
-                .successHandler(authenticationSuccessHandler("/index.html")) /** If the username and password are correct after init session, redirect to main menu*/
-                .permitAll()/** All endpoints before the success login, the authentication is required */
-                .and()
+        http
+                .authorizeHttpRequests(auth ->{
+                    auth.requestMatchers("/swagger-ui/**","/v3/api-docs","/css/**","/js/**","/login","/logout").permitAll();
+                    auth.anyRequest().authenticated();
+                })
+                .formLogin(form ->{
+                    form.loginPage("/login").permitAll();
+                    form.successHandler(authenticationSuccessHandler("/home")).permitAll();
+                })
                 .logout()
-                    .logoutUrl("/logout")
-                    .logoutSuccessHandler(logoutSuccessHandler("/login")) /**Return to login page, when the user logout*/
+                .logoutUrl("/logout")
+                .logoutSuccessHandler(logoutSuccessHandler("/login"))
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
                 .and()
-                .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)/**Create a new session, when there is not exist some other session*/
-                    .invalidSessionUrl("/login") /**If the username and password are not correct, redirect the user to login */
-                    .maximumSessions(1)/**Maximum number of session */
-                    .expiredUrl("/login") /** When the session expired, redirect to login page*/
-                    .sessionRegistry(sessionRegistry())
-                .and()
-                .sessionFixation()/**This is another, vulnerability of web application when it's working with session  */
-                    .migrateSession()/***/
-                ;
+                .sessionManagement(session ->{
+                    session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+                    session.invalidSessionUrl("/login");
+                    session.maximumSessions(1)
+                            .expiredUrl("/login")
+                            .sessionRegistry(sessionRegistry());
+                    session.sessionFixation().migrateSession();
+                })
+
+                .httpBasic();
 
         return http.build();
     }
 
+
+    /**
+     * AUTHENTICATION CONFIGURATION
+     * */
     @Bean
-    public SessionRegistry sessionRegistry(){
-        return new SessionRegistryImpl();
+    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
+        return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class)
+                .userDetailsService( userDetailsService)
+                .passwordEncoder(passwordEncoder)
+                .and().build();
+
     }
-
-
     private AuthenticationSuccessHandler authenticationSuccessHandler(String url){
         return ((request, response, authentication) -> {
             response.sendRedirect(url);
@@ -80,6 +101,11 @@ public class Config {
         return ((request, response, authentication) -> {
             response.sendRedirect(url);
         });
+    }
+
+    @Bean
+    public SessionRegistry sessionRegistry(){
+        return new SessionRegistryImpl();
     }
 
     /**
