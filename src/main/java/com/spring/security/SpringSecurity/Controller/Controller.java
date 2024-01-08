@@ -1,13 +1,13 @@
 package com.spring.security.SpringSecurity.Controller;
 
+import com.spring.security.SpringSecurity.Entity.User;
+import com.spring.security.SpringSecurity.Service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +19,9 @@ public class Controller {
 
     @Autowired
     private SessionRegistry sessionRegistry;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/DetailsSession")
     public ResponseEntity<?> getUsersDetails(){
@@ -47,4 +50,16 @@ public class Controller {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @GetMapping("/hole")
+    public ResponseEntity<?> hola(){
+        return ResponseEntity.ok("hola mundo");
+    }
+
+    @PostMapping("/addUser")
+    public ResponseEntity<?> addUser(@Valid @RequestBody User user){
+        return ResponseEntity.ok().body(this.userService.save(user));
+    }
+
 }

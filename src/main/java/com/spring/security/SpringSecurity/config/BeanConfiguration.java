@@ -1,11 +1,13 @@
 package com.spring.security.SpringSecurity.config;
 
 import com.spring.security.SpringSecurity.Controller.Controller;
-import com.spring.security.SpringSecurity.Controller.homeController;
-import com.spring.security.SpringSecurity.Controller.loginController;
+import com.spring.security.SpringSecurity.CustomFilter.JwtAuthorizationFilter;
 import com.spring.security.SpringSecurity.Repository.UserRepository;
+import com.spring.security.SpringSecurity.Service.JWTService;
+import com.spring.security.SpringSecurity.Service.JWTUtils;
 import com.spring.security.SpringSecurity.Service.UserDetailsServiceImplements;
 import com.spring.security.SpringSecurity.Service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,14 +29,20 @@ public class BeanConfiguration {
         return  new Controller();
     }
 
+
     @Bean
-    public loginController loginController(){
-        return new loginController();
+    public JWTUtils jwtUtils(){
+        return new JWTUtils();
     }
 
     @Bean
-    public homeController homeController(){
-        return new homeController();
+    public JWTService jwtService(JWTUtils jwtUtils){
+        return new JWTService(jwtUtils);
     }
 
+
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter(JWTService jwtService, UserDetailsService userDetailsService){
+        return  new JwtAuthorizationFilter(jwtService,userDetailsService);
+    }
 }
