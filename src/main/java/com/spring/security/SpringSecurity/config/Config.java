@@ -1,9 +1,9 @@
 package com.spring.security.SpringSecurity.config;
 
 
-import com.spring.security.SpringSecurity.Controller.loginController;
-import com.spring.security.SpringSecurity.Service.UserDetailsServiceImplements;
-import com.spring.security.SpringSecurity.Service.UserService;
+import com.spring.security.SpringSecurity.CustomFilter.JwtAuthenticationFilter;
+import com.spring.security.SpringSecurity.CustomFilter.JwtAuthorizationFilter;
+import com.spring.security.SpringSecurity.Service.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,13 +15,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
-import javax.management.MXBean;
+
 /*
 * Is a spring security configuration component
 * */
@@ -49,33 +50,30 @@ public class Config {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           UserDetailsService userDetailsService,
+                                           JWTService jwtService,
+                                           AuthenticationManager authenticationManager,
+                                           JwtAuthorizationFilter jwtAuthorizationFilter) throws Exception {
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(userDetailsService,jwtService);
+
+        jwtAuthenticationFilter.setAuthenticationManager(authenticationManager);
+        jwtAuthenticationFilter.setFilterProcessesUrl("/login");
+
         http
+                .csrf(config -> config.disable())
                 .authorizeHttpRequests(auth ->{
-                    auth.requestMatchers("/swagger-ui/**","/v3/api-docs","/css/**","/js/**","/login","/logout").permitAll();
+                    auth.requestMatchers("/swagger-ui/**","/v3/api-docs").permitAll();
+                    auth.requestMatchers("/v1/hole").hasAuthority("ADMIN");
+                    auth.requestMatchers("/v1/addUser").hasAnyAuthority("ADMIN");
                     auth.anyRequest().authenticated();
                 })
-                .formLogin(form ->{
-                    form.loginPage("/login").permitAll();
-                    form.successHandler(authenticationSuccessHandler("/home")).permitAll();
-                })
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessHandler(logoutSuccessHandler("/login"))
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-                .and()
                 .sessionManagement(session ->{
-                    session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
-                    session.invalidSessionUrl("/login");
-                    session.maximumSessions(1)
-                            .expiredUrl("/login")
-                            .sessionRegistry(sessionRegistry());
-                    session.sessionFixation().migrateSession();
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 })
+                .addFilter(jwtAuthenticationFilter)
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
-                .httpBasic();
 
         return http.build();
     }
@@ -113,7 +111,7 @@ public class Config {
      * */
     @Bean
     public PasswordEncoder passwordEncoder(){
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 
 }

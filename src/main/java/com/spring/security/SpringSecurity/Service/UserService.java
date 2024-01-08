@@ -2,12 +2,14 @@ package com.spring.security.SpringSecurity.Service;
 
 import com.spring.security.SpringSecurity.Entity.User;
 import com.spring.security.SpringSecurity.Repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.FluentQuery;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,9 @@ import java.util.function.Function;
 public class UserService implements UserRepository {
 
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -107,6 +112,7 @@ public class UserService implements UserRepository {
     @Transactional
     @Override
     public <S extends User> S save(S entity) {
+        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         return this.userRepository.save(entity);
     }
 

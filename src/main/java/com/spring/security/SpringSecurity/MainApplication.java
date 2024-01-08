@@ -3,6 +3,7 @@ package com.spring.security.SpringSecurity;
 import com.spring.security.SpringSecurity.Entity.Rol;
 import com.spring.security.SpringSecurity.Entity.User;
 import com.spring.security.SpringSecurity.Service.UserService;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 @EnableAutoConfiguration
@@ -38,13 +40,12 @@ public class MainApplication implements CommandLineRunner {
 		UserService defaultUser = appContext.getBean(UserService.class);
 
 		User user = User.builder()
-				.id(1)
 				.username(username)
-				.password(username)
+				.password(new BCryptPasswordEncoder().encode(password))
 				.rol(Rol.ADMIN)
 				.build();
 
-		if(defaultUser.existsById(1) == false)
+		if(defaultUser.findUserByUserName(user.getUsername()) == null)
 			System.out.println(defaultUser.save(user));
 
 	}
